@@ -1,425 +1,369 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
-import toast from "react-hot-toast";
-import { format } from "date-fns";
-import Image from "next/image";
-import { Batch, Problem, Submission, User } from "@/lib/types";
-import { Button } from "../ui/button";
-import { RichTextRenderer } from "./ui/RichTextRenderer";
+import { useState, useEffect } from "react";
+import {
+	Calendar,
+	Clock,
+	Users,
+	BookOpen,
+	Award,
+	CheckCircle,
+	XCircle,
+	Info,
+	FileText,
+	Code,
+	ChevronRight,
+	BarChart,
+	RefreshCw,
+} from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Batch, Problem } from "@/lib/types";
 
 const DetailBatchById = ({ batchId }: { batchId: string }) => {
-	const [batch, setBatch] = useState<Batch>();
-	const [users, setUsers] = useState<User[]>([]);
-	const [problems, setProblems] = useState<Problem[]>([]);
-	const [submissions, setSubmissions] = useState<Submission[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [activeTab, setActiveTab] = useState("overview");
-	const [openProblemId, setOpenProblemId] = useState<string | null>(null);
+	const [batch, setBatch] = useState<Batch | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const getBatchData = async () => {
+		const getBatch = async () => {
 			try {
+				setLoading(true);
 				const res = await fetch(`/api/batch/${batchId}`);
-				const json = await res.json();
 
 				if (!res.ok) {
-					toast.error(json.message);
-					throw new Error("Invalid get batch data");
+					throw new Error("Failed to fetch batch data");
 				}
 
-				setBatch(json.batch);
-				setUsers(json.batchUser.users);
-				setProblems(json.batch?.problems || []);
-				setSubmissions(json.batch?.submissions || []);
-				setIsLoading(false);
-			} catch (error) {
-				console.error(error);
-				toast.error("Something went wrong!");
-				setIsLoading(false);
+				const data = await res.json();
+				setBatch(data.batch);
+			} catch (err) {
+				setError(err instanceof Error ? err.message : "An error occurred");
+				console.error("Error fetching batch:", err);
+			} finally {
+				setLoading(false);
 			}
 		};
 
-		if (batchId) getBatchData();
+		getBatch();
 	}, [batchId]);
 
-	const formatDate = (dateString: Date | null) => {
-		try {
-			if (dateString === null) {
-				return "Batch is unsubmitted";
-			}
-			return format(new Date(dateString), "PPP 'at' p");
-		} catch (error) {
-			if (dateString === null) {
-				return "Batch is unsubmitted";
-			}
-			return dateString.toString();
-		}
-	};
-
-	const handleToggleProblem = (problemId: string) => {
-		setOpenProblemId(openProblemId === problemId ? null : problemId);
-	};
-
-	if (isLoading) {
+	if (loading) {
 		return (
-			<div className="flex flex-col items-center justify-center min-h-64 p-6">
-				<RefreshCw className="h-8 w-8 animate-spin text-gray-500 mb-4" />
-				<h3 className="text-lg font-medium">Loading Batch Details...</h3>
+			<div className="flex flex-col gap-3 font-poppins justify-center items-center min-h-screen">
+				<RefreshCw className="animate-spin text-black" size={32} />
+				<div>Loading Detail Batch...</div>
 			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<Alert variant="destructive" className="mx-auto max-w-3xl mt-6">
+				<Info className="h-4 w-4" />
+				<AlertTitle>Error</AlertTitle>
+				<AlertDescription>
+					Failed to load batch details: {error}
+				</AlertDescription>
+			</Alert>
 		);
 	}
 
 	if (!batch) {
 		return (
-			<div className="flex flex-col items-center justify-center min-h-64 p-6">
-				<h3 className="text-xl font-medium text-gray-700">Batch not found</h3>
-			</div>
+			<Alert className="mx-auto max-w-3xl mt-6">
+				<Info className="h-4 w-4" />
+				<AlertTitle>Not Found</AlertTitle>
+				<AlertDescription>
+					Batch information could not be found. Please check the batch ID and
+					try again.
+				</AlertDescription>
+			</Alert>
 		);
 	}
 
+	// Format time from seconds to HH:MM:SS
+	const formatTime = (seconds: number) => {
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const remainingSeconds = seconds % 60;
+
+		return [
+			hours.toString().padStart(2, "0"),
+			minutes.toString().padStart(2, "0"),
+			remainingSeconds.toString().padStart(2, "0"),
+		].join(":");
+	};
+
+	// Calculate batch status
+	const now = new Date();
+	const startDate = new Date(batch.startedAt);
+	const endDate = new Date(startDate.getTime() + batch.timer * 1000);
+
+	let status = "Scheduled";
+	if (now > endDate) {
+		status = "Completed";
+	} else if (now >= startDate) {
+		status = "In Progress";
+	}
+
+	// Calculate progress percentage if in progress
+	let progressPercentage = 0;
+	if (status === "In Progress") {
+		const totalTime = batch.timer * 1000;
+		const elapsed = now.getTime() - startDate.getTime();
+		progressPercentage = Math.min(Math.floor((elapsed / totalTime) * 100), 100);
+	} else if (status === "Completed") {
+		progressPercentage = 100;
+	}
+
+	const teamCount = batch.teams?.length || 0;
+	const problemCount = batch.problems?.length || 0;
+	const submissionCount = batch.submissions?.length || 0;
+
 	return (
-		<div className="bg-white w-full min-h-screen">
-			{/* Header */}
-			<div className="bg-gray-800 p-6 text-white">
-				<h1 className="text-2xl font-bold mb-2">{batch.title}</h1>
-				<div className="flex flex-wrap gap-4 text-sm opacity-90">
-					<div>Created: {formatDate(batch.createdAt)}</div>
-					<div className="flex items-center">
-						<span
-							className={`h-2 w-2 rounded-full mr-2 ${
-								batch.publish ? "bg-gray-300" : "bg-gray-400"
-							}`}
-						></span>
-						{batch.publish ? "Published" : "Unpublished"}
+		<div className="container mx-auto p-4 max-w-6xl">
+			{/* Batch Header */}
+			<div className="mb-6">
+				<div className="flex items-center justify-between mb-2">
+					<h1 className="text-3xl font-bold">{batch.title}</h1>
+					<Badge
+						className={`px-3 py-1 text-sm ${
+							status === "In Progress" ? "bg-green-500"
+							: status === "Completed" ? "bg-blue-500"
+							: "bg-yellow-500"
+						}`}
+					>
+						{status}
+					</Badge>
+				</div>
+
+				<div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+					<div className="flex items-center gap-1">
+						<Calendar className="h-4 w-4" />
+						<span>Started: {new Date(batch.startedAt).toLocaleString()}</span>
+					</div>
+					<div className="flex items-center gap-1">
+						<Clock className="h-4 w-4" />
+						<span>Duration: {formatTime(batch.timer)}</span>
 					</div>
 				</div>
-			</div>
 
-			{/* Navigation Tabs */}
-			<div className="border-b border-gray-200">
-				<nav className="flex -mb-px">
-					{["overview", "problems", "participants", "submissions"].map(
-						(tab) => (
-							<button
-								key={tab}
-								onClick={() => setActiveTab(tab)}
-								className={`capitalize py-4 px-6 font-medium border-b-2 transition-colors ${
-									activeTab === tab
-										? "border-gray-800 text-gray-800"
-										: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-								}`}
-							>
-								{tab}
-							</button>
-						)
-					)}
-				</nav>
-			</div>
-
-			{/* Tab Content */}
-			<div className="p-6">
-				{activeTab === "overview" && (
-					<div>
-						<div className="mb-6">
-							<h2 className="text-xl font-semibold mb-2">Description</h2>
-							<p className="text-gray-700 whitespace-pre-line">
-								{batch.description || "No description provided."}
-							</p>
-						</div>
-
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<div className="bg-gray-50 p-4 border border-gray-100">
-								<h3 className="font-medium text-gray-500 mb-1">Time Limit</h3>
-								<p className="text-lg font-semibold">{batch.timer} minutes</p>
-							</div>
-							<div className="bg-gray-50 p-4 border border-gray-100">
-								<h3 className="font-medium text-gray-500 mb-1">Problems</h3>
-								<p className="text-lg font-semibold">{problems.length}</p>
-							</div>
-							<div className="bg-gray-50 p-4 border border-gray-100">
-								<h3 className="font-medium text-gray-500 mb-1">Participants</h3>
-								<p className="text-lg font-semibold">{users.length}</p>
-							</div>
-						</div>
+				{batch.description && (
+					<div className="bg-gray-50 p-4 rounded-lg mt-2">
+						<p className="text-gray-700">{batch.description}</p>
 					</div>
 				)}
+			</div>
 
-				{activeTab === "problems" && (
-					<div>
-						<h2 className="text-xl font-semibold mb-4">Problems</h2>
-						{problems.length === 0 ? (
-							<p className="text-gray-500 italic">
-								No problems have been added to this batch.
-							</p>
-						) : (
-							<div className="space-y-4">
-								{problems.map((problem, index) => (
-									<div
-										key={problem.id}
-										className="border border-gray-200 transition-all"
-									>
-										<div
-											className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50"
-											onClick={() => handleToggleProblem(problem.id)}
-										>
-											<div>
-												<h3 className="font-medium">
-													{index + 1}. {problem.title}
-												</h3>
-												<div className="flex mt-2 gap-2">
-													<span className="bg-gray-100 text-gray-800 text-xs px-2 py-1">
-														{problem.testCases?.length || 0} Test Cases
-													</span>
-												</div>
-											</div>
-											<Button variant="ghost" className="p-2">
-												{openProblemId === problem.id ? (
-													<ChevronUp className="w-5 h-5 text-gray-600" />
-												) : (
-													<ChevronDown className="w-5 h-5 text-gray-600" />
-												)}
-											</Button>
+			{/* Status Cards */}
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="flex items-center text-lg">
+							<Users className="h-5 w-5 mr-2 text-indigo-600" />
+							Teams
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="text-3xl font-bold">{teamCount}</div>
+						<p className="text-sm text-gray-500">Participating teams</p>
+					</CardContent>
+				</Card>
+
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="flex items-center text-lg">
+							<BookOpen className="h-5 w-5 mr-2 text-indigo-600" />
+							Problems
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="text-3xl font-bold">{problemCount}</div>
+						<p className="text-sm text-gray-500">Challenges to solve</p>
+					</CardContent>
+				</Card>
+
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="flex items-center text-lg">
+							<Code className="h-5 w-5 mr-2 text-indigo-600" />
+							Submissions
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="text-3xl font-bold">{submissionCount}</div>
+						<p className="text-sm text-gray-500">Total submissions made</p>
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Progress Section */}
+			{status === "In Progress" && (
+				<Card className="mb-6">
+					<CardHeader>
+						<CardTitle>Batch Progress</CardTitle>
+						<CardDescription>
+							Time remaining:{" "}
+							{formatTime(
+								batch.timer -
+									Math.floor((now.getTime() - startDate.getTime()) / 1000)
+							)}
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Progress value={progressPercentage} className="h-2" />
+						<div className="flex justify-between mt-2 text-sm text-gray-500">
+							<span>{progressPercentage}% completed</span>
+							<span>Ends at {endDate.toLocaleString()}</span>
+						</div>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Problems Section */}
+			<Card className="mb-6">
+				<CardHeader>
+					<CardTitle className="flex items-center">
+						<BookOpen className="h-5 w-5 mr-2" />
+						Problems
+					</CardTitle>
+					<CardDescription>
+						{problemCount} problems in this batch
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{batch.problems && batch.problems.length > 0 ?
+						<div className="space-y-2">
+							{batch.problems.map((problem: Problem) => (
+								<div
+									key={problem.id}
+									className="p-3 border rounded-md flex justify-between items-center hover:bg-gray-50"
+								>
+									<div>
+										<h3 className="font-medium">{problem.title}</h3>
+										<p className="text-sm text-gray-500">
+											{problem.testCases?.length || 0} test cases
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					:	<div className="text-center p-6 text-gray-500">
+							No problems have been added to this batch yet.
+						</div>
+					}
+				</CardContent>
+			</Card>
+
+			{/* Teams Section */}
+			<Card className="mb-6">
+				<CardHeader>
+					<CardTitle className="flex items-center">
+						<Users className="h-5 w-5 mr-2" />
+						Participating Teams
+					</CardTitle>
+					<CardDescription>{teamCount} teams registered</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{batch.teams && batch.teams.length > 0 ?
+						<div className="space-y-2">
+							{batch.teams.map((batchTeam) => (
+								<div
+									key={batchTeam.id}
+									className="p-3 border rounded-md flex justify-between items-center hover:bg-gray-50"
+								>
+									<div className="flex items-center">
+										<div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+											<span className="font-medium text-indigo-700">
+												{batchTeam.team?.name?.charAt(0) || "T"}
+											</span>
 										</div>
+										<div>
+											<h3 className="font-medium">
+												{batchTeam.team?.name || "Team"}
+											</h3>
+											<p className="text-sm text-gray-500">
+												{batchTeam.isStart ? "Started" : "Not started"}
+											</p>
+										</div>
+									</div>
+									<Badge
+										variant={batchTeam.isStart ? "default" : "outline"}
+										className="ml-2"
+									>
+										{batchTeam.isStart ? "Active" : "Pending"}
+									</Badge>
+								</div>
+							))}
+						</div>
+					:	<div className="text-center p-6 text-gray-500">
+							No teams have registered for this batch yet.
+						</div>
+					}
+				</CardContent>
+			</Card>
 
-										{/* Problem Detail (Expandable Content) */}
-										{openProblemId === problem.id && (
-											<div className="p-4 pt-0 border-t border-gray-100 bg-gray-50">
-												<div className="mt-4">
-													<h4 className="text-sm font-medium text-gray-500 mb-2">
-														Problem Description
-													</h4>
-													<div className="p-3 bg-white">
-														<RichTextRenderer
-															description={problem.description}
-														/>
-													</div>
-												</div>
-
-												{problem.languages && problem.languages.length > 0 && (
-													<div className="mt-4">
-														<h4 className="text-sm font-medium text-gray-500 mb-2">
-															Supported Languages
-														</h4>
-														<div className="flex flex-wrap gap-2">
-															{problem.languages.map((language) => (
-																<span
-																	key={language.id}
-																	className="bg-gray-200 text-gray-700 text-xs px-2 py-1"
-																>
-																	{language.name}
-																</span>
-															))}
-														</div>
-													</div>
-												)}
-
-												{problem.testCases && problem.testCases.length > 0 && (
-													<div className="mt-4">
-														<h4 className="text-sm font-medium text-gray-500 mb-2">
-															Test Cases
-														</h4>
-														<div className="space-y-2">
-															{problem.testCases.slice(0, 2).map((testCase) => (
-																<div
-																	key={testCase.id}
-																	className="border border-gray-200 p-3 bg-white"
-																>
-																	<div className="grid grid-cols-2 gap-4">
-																		<div>
-																			<p className="text-xs text-gray-500 mb-1">
-																				Input:
-																			</p>
-																			<pre className="bg-gray-50 p-2 text-xs overflow-x-auto">
-																				{testCase.input}
-																			</pre>
-																		</div>
-																		<div>
-																			<p className="text-xs text-gray-500 mb-1">
-																				Expected Output:
-																			</p>
-																			<pre className="bg-gray-50 p-2 text-xs overflow-x-auto">
-																				{testCase.output}
-																			</pre>
-																		</div>
-																	</div>
-																</div>
-															))}
-															{problem.testCases.length > 2 && (
-																<p className="text-xs text-gray-500 italic">
-																	+ {problem.testCases.length - 2} more test
-																	cases
-																</p>
-															)}
-														</div>
-													</div>
-												)}
+			{/* Submissions Overview */}
+			{submissionCount > 0 && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center">
+							<BarChart className="h-5 w-5 mr-2" />
+							Submission Statistics
+						</CardTitle>
+						<CardDescription>Overview of team performance</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="space-y-4">
+							{batch.submissions &&
+								batch.submissions.slice(0, 5).map((submission) => (
+									<div
+										key={submission.id}
+										className="flex items-center justify-between p-3 border rounded-md"
+									>
+										<div>
+											<h3 className="font-medium">
+												{submission.Team?.name || "Team"}
+											</h3>
+											<div className="flex items-center text-sm text-gray-500 mt-1">
+												<CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+												<span>{submission.totalProblemsSolved} solved</span>
+												<span className="mx-2">•</span>
+												<span>Score: {submission.score}</span>
 											</div>
-										)}
+										</div>
+										<div className="text-right">
+											<Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200">
+												{submission.isFinish ? "Finished" : "In Progress"}
+											</Badge>
+											{submission.completionTime && (
+												<p className="text-xs text-gray-500 mt-1">
+													Time: {submission.completionTime}
+												</p>
+											)}
+										</div>
 									</div>
 								))}
-							</div>
-						)}
-					</div>
-				)}
-
-				{activeTab === "participants" && (
-					<div>
-						<h2 className="text-xl font-semibold mb-4">Participants</h2>
-						{users.length === 0 ? (
-							<p className="text-gray-500 italic">
-								No participants have been assigned to this batch.
-							</p>
-						) : (
-							<div className="overflow-x-auto">
-								<table className="min-w-full divide-y divide-gray-200">
-									<thead>
-										<tr>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Name
-											</th>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Email
-											</th>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Status
-											</th>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Joined
-											</th>
-										</tr>
-									</thead>
-									<tbody className="bg-white divide-y divide-gray-200">
-										{users.map((batchUser) => (
-											<tr key={batchUser.id} className="hover:bg-gray-50">
-												<td className="px-6 py-4 whitespace-nowrap">
-													<div className="flex items-center">
-														<div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-3">
-															{batchUser?.photo && (
-																<Image
-																	src={batchUser.photo}
-																	alt={batchUser.name || "photo.png"}
-																	width={32}
-																	height={32}
-																	className="h-full w-full object-cover"
-																/>
-															)}
-														</div>
-														<div className="font-medium">
-															{batchUser.name || "No name"}
-														</div>
-													</div>
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap text-sm">
-													{batchUser.email}
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap">
-													<span
-														className={`inline-flex px-2 py-1 text-xs ${
-															batchUser.isDisqualified
-																? "bg-gray-100 text-gray-800"
-																: "bg-gray-100 text-gray-800"
-														}`}
-													>
-														{batchUser.isDisqualified
-															? "Disqualified"
-															: "Active"}
-													</span>
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-													{formatDate(batchUser.createdAt)}
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						)}
-					</div>
-				)}
-
-				{activeTab === "submissions" && (
-					<div>
-						<h2 className="text-xl font-semibold mb-4">Submissions</h2>
-						{submissions.length === 0 ? (
-							<p className="text-gray-500 italic">
-								No submissions have been made for this batch.
-							</p>
-						) : (
-							<div className="overflow-x-auto">
-								<table className="min-w-full divide-y divide-gray-200">
-									<thead>
-										<tr>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Participant
-											</th>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Score
-											</th>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Problems Solved
-											</th>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Status
-											</th>
-											<th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Submitted At
-											</th>
-										</tr>
-									</thead>
-									<tbody className="bg-white divide-y divide-gray-200">
-										{submissions.map((submission) => (
-											<tr key={submission.id} className="hover:bg-gray-50">
-												<td className="px-6 py-4 whitespace-nowrap">
-													<div className="flex items-center">
-														<div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden mr-3">
-															{submission.user?.photo && (
-																<Image
-																	src={submission.user.photo}
-																	alt={submission.user.name || "photo.png"}
-																	width={32}
-																	height={32}
-																	className="h-full w-full object-cover"
-																/>
-															)}
-														</div>
-														<div className="font-medium">
-															{submission.user?.name || "Unknown User"}
-														</div>
-													</div>
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap">
-													<span className="font-semibold">
-														{submission.score}
-													</span>
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap">
-													{submission.totalProblemsSolved} / {problems.length}
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap">
-													<span
-														className={`inline-flex px-2 py-1 text-xs ${
-															submission.isFinish
-																? "bg-gray-100 text-gray-800"
-																: "bg-gray-100 text-gray-800"
-														}`}
-													>
-														{submission.isFinish ? "Completed" : "In Progress"}
-													</span>
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-													{formatDate(submission.submittedAt)}
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						)}
-					</div>
-				)}
-			</div>
+						</div>
+					</CardContent>
+					<CardFooter className="justify-center border-t pt-4">
+						<button className="text-indigo-600 text-sm font-medium hover:text-indigo-800 flex items-center">
+							View all submissions
+							<ChevronRight className="h-4 w-4 ml-1" />
+						</button>
+					</CardFooter>
+				</Card>
+			)}
 		</div>
 	);
 };

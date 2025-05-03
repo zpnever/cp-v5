@@ -168,7 +168,7 @@ const Contest = ({ userId, teamId, contestId }: IProps) => {
 				if (data.finished.length === memberLength) {
 					router.push("/batch");
 				}
-			}, 10000);
+			}, 5000);
 
 			return () => clearInterval(interval);
 		}
@@ -268,9 +268,7 @@ const Contest = ({ userId, teamId, contestId }: IProps) => {
 				<div>
 					<div className="flex items-center gap-4">
 						{isUserFinished && finishedUsers.length < memberLength && (
-							<span className="text-sm text-muted-foreground">
-								Menunggu anggota lain...
-							</span>
+							<span className="text-sm text-muted-foreground">Menunggu...</span>
 						)}
 						{isUserFinished ?
 							<Button
@@ -325,7 +323,7 @@ const Contest = ({ userId, teamId, contestId }: IProps) => {
 					return (
 						<div
 							key={prob.id}
-							className={`border rounded-lg shadow-sm hover:shadow-md transition-shadow ${
+							className={`border flex justify-between rounded-lg shadow-sm hover:shadow-md transition-shadow ${
 								isSuccess ?
 									"border-green-200 bg-green-50"
 								:	"border-gray-200 bg-white"

@@ -127,11 +127,6 @@ const ContestProblem = ({
 
 	// LOGS
 	useEffect(() => {
-		// const socket = io(process.env.SOCKET_URL || "wss://cp.inacomp.site", {
-		// path: "/ws",
-		// 	transports: ["websocket"],
-		// });
-
 		const socket = socketRef.current;
 
 		if (!socket) return;

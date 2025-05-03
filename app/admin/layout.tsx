@@ -9,6 +9,7 @@ const listNav = [
 	{ name: "Teams", href: "/admin/teams" },
 	{ name: "Submissions", href: "/admin/submissions" },
 	{ name: "Disqualified", href: "/admin/disqualified" },
+	{ name: "Undisqualified", href: "/admin/undisqualified" },
 ];
 
 export default async function RootLayout({
@@ -24,14 +25,17 @@ export default async function RootLayout({
 				<nav className="z-10 flex justify-between items-center bg-white px-8 h-15 shadow-lg border-2 border-gray-200">
 					<ul className="flex gap-4 items-center">
 						<li className="border-r-2 border-gray-200 pr-6 mr-2">
-							<Link href="/" className="text-xl font-bold gap-2 flex">
-								<Image src="/logo.png" alt="logo.png" width={24} height={24} />
+							<Link
+								href="/"
+								className="text-xl flex gap-1 items-center font-bold "
+							>
+								<Image src="/logo1.svg" alt="logo.svg" width={24} height={24} />
 								<Image
-									src="/title.png"
-									alt="title.png"
-									width={80}
+									src="/textLogo.svg"
+									alt="textLogo.svg"
+									width={70}
 									height={28}
-									className="h-8 w-full"
+									className="h-7 w-full"
 								/>
 							</Link>
 						</li>

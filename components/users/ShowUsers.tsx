@@ -19,6 +19,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import PopupDelete from "../batch-form/ui/popup-delete";
+import Link from "next/link";
 
 const ShowUsers = () => {
 	const [users, setUsers] = useState<User[]>([]);
@@ -66,15 +67,13 @@ const ShowUsers = () => {
 		const sortedUsers = [...users].sort((a, b) => {
 			if (key === "status") {
 				// Sort by verification status
-				const aStatus = a.isDisqualified
-					? "disqualified"
-					: a.isVerified
-					? "qualified"
+				const aStatus =
+					a.isDisqualified ? "disqualified"
+					: a.isVerified ? "qualified"
 					: "pending";
-				const bStatus = b.isDisqualified
-					? "disqualified"
-					: b.isVerified
-					? "qualified"
+				const bStatus =
+					b.isDisqualified ? "disqualified"
+					: b.isVerified ? "qualified"
 					: "pending";
 
 				if (aStatus < bStatus) {
@@ -223,12 +222,9 @@ const ShowUsers = () => {
 								return (
 									<TableRow
 										key={user.id}
-										className="hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100"
+										className="hover:bg-gray-50 transition-colors border-b border-gray-100"
 									>
-										<TableCell
-											className="font-medium flex items-center gap-3"
-											onClick={() => router.push(`/admin/users/${user.id}`)}
-										>
+										<TableCell className="font-medium flex items-center gap-3">
 											<Avatar className={`h-10 w-10 ${avatarStyle}`}>
 												<AvatarImage
 													src={
@@ -238,19 +234,17 @@ const ShowUsers = () => {
 													alt={user.name || "User"}
 												/>
 											</Avatar>
-											<span className="truncate max-w-[200px]">
+											<Link
+												className="truncate max-w-[200px]"
+												href={`/admin/users/${user.id}`}
+											>
 												{user.name || "Unnamed User"}
-											</span>
+											</Link>
 										</TableCell>
-										<TableCell
-											className="text-gray-700"
-											onClick={() => router.push(`/admin/users/${user.id}`)}
-										>
+										<TableCell className="text-gray-700">
 											{user.email}
 										</TableCell>
-										<TableCell
-											onClick={() => router.push(`/admin/users/${user.id}`)}
-										>
+										<TableCell>
 											<Badge
 												variant={getStatusBadgeVariant(user)}
 												className="font-normal"
@@ -258,12 +252,7 @@ const ShowUsers = () => {
 												{getUserStatus(user)}
 											</Badge>
 										</TableCell>
-										<TableCell
-											className="text-gray-700"
-											onClick={() => router.push(`/admin/users/${user.id}`)}
-										>
-											{user.role}
-										</TableCell>
+										<TableCell className="text-gray-700">{user.role}</TableCell>
 										<TableCell
 											className="text-right"
 											onClick={(e) => e.stopPropagation()}

@@ -37,7 +37,8 @@ const AlertDisqualified = ({ teamIds }: { teamIds: string[] }) => {
 						disabled={teamIds.length === 0}
 						title="Disqualified Team"
 						className={
-							teamIds.length === 0 ? "opacity-50 cursor-not-allowed" : ""
+							"bg-blue-500 hover:bg-blue-600" +
+							(teamIds.length === 0 ? "opacity-50 cursor-not-allowed" : "")
 						}
 					>
 						Disqualify Selected Teams ({teamIds.length})

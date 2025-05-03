@@ -59,6 +59,18 @@ export const GET = async (
 			{ status: 400 }
 		);
 
+	const updated = await db.batchTeam.update({
+		where: {
+			batchId_teamId: {
+				batchId: batch.id,
+				teamId,
+			},
+		},
+		data: {
+			isStart: true,
+		},
+	});
+
 	return NextResponse.json(
 		{ message: "Success", data: { submission, batch, membersLength } },
 		{ status: 200 }

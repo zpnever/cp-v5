@@ -5,8 +5,8 @@ export function getScore({
 	memoryUsages,
 	completionTime,
 	maxCompletionTime = 3600, // default: 1 jam
-	defaultExecutionTime = 1, // default: 2 detik
-	defaultMemoryUsage = 10240, // default: 10240 KB
+	defaultExecutionTime = 0.5, // default: 0.5 detik
+	defaultMemoryUsage = 40960, // default: 10240 KB
 }: {
 	solvedCount: number;
 	totalProblems: number;

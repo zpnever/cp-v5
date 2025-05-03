@@ -42,8 +42,6 @@ const CardBatchContest = ({ teamId }: { teamId: string }) => {
 	}, [teamId]);
 
 	const handleStartBatch = async (batchId: string) => {
-		console.log(batchId);
-		console.log(submission);
 		const submissionFiltered = submission.filter(
 			(sub) => sub.batchId === batchId
 		);
@@ -87,7 +85,7 @@ const CardBatchContest = ({ teamId }: { teamId: string }) => {
 
 	return (
 		<div className="space-y-6">
-			{isDisqualified ? (
+			{isDisqualified ?
 				<div className="w-full h-24 space-y-2 flex items-center flex-col justify-center text-center font-semibold">
 					<div className="text-red-500">
 						Sayang sekali, jalanmu harus terhenti disini. Tapi jangan
@@ -97,11 +95,10 @@ const CardBatchContest = ({ teamId }: { teamId: string }) => {
 						Terima kasih telah berpartisipasi dalam lomba ini
 					</div>
 				</div>
-			) : (
-				<div>
+			:	<div>
 					<h2 className="text-xl font-bold">Available Batches</h2>
 
-					{availableBatches.length > 0 ? (
+					{availableBatches.length > 0 ?
 						<div className="grid grid-cols-1 pt-4 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{availableBatches.map((batchItem) => {
 								const { batch, isStart } = batchItem;
@@ -147,37 +144,34 @@ const CardBatchContest = ({ teamId }: { teamId: string }) => {
 										<button
 											onClick={() => handleStartBatch(batch.id)}
 											disabled={!canStart}
-											className={`w-full py-2 px-4 rounded-md transition-colors ${
-												isStart
-													? "bg-gray-300 text-gray-600 cursor-not-allowed"
-													: canStart
-													? "bg-blue-600 text-white hover:bg-blue-700"
-													: "bg-gray-300 text-gray-600 cursor-not-allowed"
+											className={`w-full py-2 cursor-pointer px-4 rounded-md transition-colors ${
+												isStart ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+												: canStart ? "bg-blue-600 text-white hover:bg-blue-700"
+												: "bg-gray-300 text-gray-600 cursor-not-allowed"
 											}`}
 										>
-											{isStart
-												? "Started"
-												: canStart
-												? "Start Batch"
-												: "Not Yet Available"}
+											{isStart ?
+												"Started"
+											: canStart ?
+												"Start Batch"
+											:	"Not Yet Available"}
 										</button>
 									</div>
 								);
 							})}
 						</div>
-					) : (
-						<div className="text-center py-8 text-gray-500">
+					:	<div className="text-center py-8 text-gray-500">
 							No available batches.
 						</div>
-					)}
+					}
 				</div>
-			)}
+			}
 
 			{/* History Section */}
 			<div>
 				<h2 className="text-xl font-bold">History Batches</h2>
 
-				{historyBatches.length > 0 ? (
+				{historyBatches.length > 0 ?
 					<div className="grid grid-cols-1 pt-4 gap-4 md:grid-cols-2 lg:grid-cols-3">
 						{historyBatches.map((batchItem) => {
 							const { batch } = batchItem;
@@ -216,11 +210,8 @@ const CardBatchContest = ({ teamId }: { teamId: string }) => {
 							);
 						})}
 					</div>
-				) : (
-					<div className="text-center py-8 text-gray-500">
-						No history found.
-					</div>
-				)}
+				:	<div className="text-center py-8 text-gray-500">No history found.</div>
+				}
 			</div>
 		</div>
 	);

@@ -178,9 +178,9 @@ const DisqualifiedTable = () => {
 
 	const getBatchName = (batchId: string) => {
 		const batch = batches.find((b) => b.id === batchId);
-		return batch
-			? `${batch.title} (${new Date(batch.startedAt).toLocaleDateString()})`
-			: "Unknown Batch";
+		return batch ?
+				`${batch.title} (${new Date(batch.startedAt).toLocaleDateString()})`
+			:	"Unknown Batch";
 	};
 
 	return (
@@ -188,22 +188,29 @@ const DisqualifiedTable = () => {
 			<h2 className="text-2xl font-bold">Disqualified Team</h2>
 
 			{/* Batch Selection */}
-			<div className="flex items-center space-x-2">
-				<span className="font-medium">Select Batch:</span>
-				<Select value={selectedBatch} onValueChange={handleBatchChange}>
-					<SelectTrigger className="w-[250px]">
-						<SelectValue placeholder="Select a batch">
-							{selectedBatch ? getBatchName(selectedBatch) : "Select a batch"}
-						</SelectValue>
-					</SelectTrigger>
-					<SelectContent>
-						{batches.map((batch) => (
-							<SelectItem key={batch.id} value={batch.id}>
-								{batch.title} - {new Date(batch.startedAt).toLocaleString()}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+			<div className="flex items-center justify-between space-x-2">
+				<div className="flex gap-2 items-center">
+					<span className="font-medium">Select Batch:</span>
+					<Select value={selectedBatch} onValueChange={handleBatchChange}>
+						<SelectTrigger className="w-[250px]">
+							<SelectValue placeholder="Select a batch">
+								{selectedBatch ? getBatchName(selectedBatch) : "Select a batch"}
+							</SelectValue>
+						</SelectTrigger>
+						<SelectContent>
+							{batches.map((batch) => (
+								<SelectItem key={batch.id} value={batch.id}>
+									{batch.title} - {new Date(batch.startedAt).toLocaleString()}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				{/* Disqualify Button */}
+				<div className="flex justify-end">
+					<AlertDisqualified teamIds={selectedTeamIds} />
+				</div>
 			</div>
 
 			{/* Leaderboard Table */}
@@ -318,11 +325,6 @@ const DisqualifiedTable = () => {
 						)}
 					</TableBody>
 				</Table>
-			</div>
-
-			{/* Disqualify Button */}
-			<div className="flex justify-end">
-				<AlertDisqualified teamIds={selectedTeamIds} />
 			</div>
 		</div>
 	);
