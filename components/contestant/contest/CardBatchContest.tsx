@@ -101,7 +101,8 @@ const CardBatchContest = ({ teamId }: { teamId: string }) => {
 					{availableBatches.length > 0 ?
 						<div className="grid grid-cols-1 pt-4 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{availableBatches.map((batchItem) => {
-								const { batch, isStart } = batchItem;
+								const { batch } = batchItem;
+								const isStart = false
 								const canStart =
 									isStartTimeReached(batch.startedAt) && !isStart;
 

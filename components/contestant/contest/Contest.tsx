@@ -323,7 +323,7 @@ const Contest = ({ userId, teamId, contestId }: IProps) => {
 					return (
 						<div
 							key={prob.id}
-							className={`border flex justify-between rounded-lg shadow-sm hover:shadow-md transition-shadow ${
+							className={`border flex flex-col justify-between rounded-lg shadow-sm hover:shadow-md transition-shadow ${
 								isSuccess ?
 									"border-green-200 bg-green-50"
 								:	"border-gray-200 bg-white"
