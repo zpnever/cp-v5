@@ -40,7 +40,7 @@ const DetailUserById = ({ userId }: { userId: string }) => {
 					throw new Error(`Failed to fetch user: ${res.statusText}`);
 				}
 				const data = await res.json();
-				setUser(data);
+				setUser(data.users);
 			} catch (err) {
 				setError(
 					err instanceof Error ? err.message : "An unknown error occurred"

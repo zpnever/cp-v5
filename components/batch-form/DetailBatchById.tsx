@@ -150,11 +150,11 @@ const DetailBatchById = ({ batchId }: { batchId: string }) => {
 				<div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
 					<div className="flex items-center gap-1">
 						<Calendar className="h-4 w-4" />
-						<span>Started: {new Date(batch.startedAt).toLocaleString()}</span>
+						<span>Started: {new Date(batch.startedAt).toLocaleDateString("id-ID")}</span>
 					</div>
 					<div className="flex items-center gap-1">
 						<Clock className="h-4 w-4" />
-						<span>Duration: {formatTime(batch.timer)}</span>
+						<span>Duration: {formatTime(batch.timer * 60)}</span>
 					</div>
 				</div>
 
