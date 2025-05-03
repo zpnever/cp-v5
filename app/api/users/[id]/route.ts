@@ -7,9 +7,13 @@ export const GET = async (
 ) => {
 	try {
 		const userId = (await params).id;
-		const users = await db.user.findUnique({
+		const users = await db.user.findFirst({
 			where: {
 				id: userId,
+			},
+			include: {
+				SubmissionProblem: true,
+				Team: true,
 			},
 		});
 

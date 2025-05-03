@@ -18,8 +18,8 @@ export interface User {
 	role: Role;
 	createdAt: Date;
 	updatedAt: Date;
-	submissions?: Submission[];
 	Team?: Team | null;
+	SubmissionProblem?: SubmissionProblem[];
 }
 
 export interface PasswordResetToken {
@@ -48,10 +48,10 @@ export interface Problem {
 	title: string;
 	description: string;
 	batchId: string;
+	functionExecution: string;
 	createdAt: Date;
 	updatedAt: Date;
 	batch?: Batch;
-	functionExecution: string;
 	languages?: Language[];
 	testCases?: TestCase[];
 	submissionProblems?: SubmissionProblem[];
@@ -91,7 +91,6 @@ export interface BatchTeam {
 
 export interface Submission {
 	id: string;
-	userId: string;
 	teamId: string;
 	batchId: string;
 	isFinish: boolean;
@@ -99,8 +98,7 @@ export interface Submission {
 	startAt: Date;
 	submittedAt: Date | null;
 	totalProblemsSolved: number;
-	completionTime: string | null;
-	user?: User;
+	completionTime: number | null;
 	batch?: Batch;
 	Team?: Team;
 	submissionProblems?: SubmissionProblem[];
@@ -108,7 +106,9 @@ export interface Submission {
 
 export interface SubmissionProblem {
 	id: string;
+	teamId: string;
 	submissionId: string;
+	userId: string;
 	problemId: string;
 	languageId: number | null;
 	success: boolean;
@@ -118,14 +118,15 @@ export interface SubmissionProblem {
 	submittedAt: Date;
 	submission?: Submission;
 	problem?: Problem;
+	user?: User;
 }
 
 export interface Team {
 	id: string;
 	name: string;
+	isDisqualified: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	isDisqualified: boolean;
 	members?: User[];
 	submissions?: Submission[];
 	batches?: BatchTeam[];

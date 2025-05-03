@@ -83,7 +83,7 @@ const DetailTeamById = ({ teamId }: { teamId: string }) => {
 	}, [teamId]);
 
 	const formatDate = (date: Date) => {
-		return new Date(date).toLocaleString("en-US", {
+		return new Date(date).toLocaleString("id-ID", {
 			year: "numeric",
 			month: "long",
 			day: "numeric",

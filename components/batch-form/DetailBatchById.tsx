@@ -119,7 +119,7 @@ const DetailBatchById = ({ batchId }: { batchId: string }) => {
 	// Calculate progress percentage if in progress
 	let progressPercentage = 0;
 	if (status === "In Progress") {
-		const totalTime = batch.timer * 1000;
+		const totalTime = batch.timer * 60 * 1000;
 		const elapsed = now.getTime() - startDate.getTime();
 		progressPercentage = Math.min(Math.floor((elapsed / totalTime) * 100), 100);
 	} else if (status === "Completed") {
