@@ -13,6 +13,7 @@ import {
 	ChevronRight,
 	BarChart,
 	RefreshCw,
+	ArrowLeft,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -28,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Batch, Problem } from "@/lib/types";
+import { Button } from "../ui/button";
 
 const DetailBatchById = ({ batchId }: { batchId: string }) => {
 	const [batch, setBatch] = useState<Batch | null>(null);
@@ -133,6 +135,13 @@ const DetailBatchById = ({ batchId }: { batchId: string }) => {
 	return (
 		<div className="container mx-auto p-4 max-w-6xl">
 			{/* Batch Header */}
+			<Button
+					variant="outline"
+					onClick={() => window.history.back()}
+					className="mb-4"
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" /> Back to Teams
+				</Button>
 			<div className="mb-6">
 				<div className="flex items-center justify-between mb-2">
 					<h1 className="text-3xl font-bold">{batch.title}</h1>
