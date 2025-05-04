@@ -152,25 +152,27 @@ const Contest = ({ userId, teamId, contestId }: IProps) => {
 	// Finish check
 	useEffect(() => {
 		if (!stepProblem) {
-			const interval = setInterval(async () => {
-				const res = await fetch(
-					`/api/finish?contestId=${contestId}&teamId=${teamId}`
-				);
-				const data = await res.json();
-				setFinishedUsers(data.finished);
+			if (isUserFinished) {
+				const interval = setInterval(async () => {
+					const res = await fetch(
+						`/api/finish?contestId=${contestId}&teamId=${teamId}`
+					);
+					const data = await res.json();
+					setFinishedUsers(data.finished);
 
-				if (data.finished.includes(userId || "")) {
-					setIsUserFinished(true);
-				} else {
-					setIsUserFinished(false);
-				}
+					if (data.finished.includes(userId || "")) {
+						setIsUserFinished(true);
+					} else {
+						setIsUserFinished(false);
+					}
 
-				if (data.finished.length === memberLength) {
-					router.push("/batch");
-				}
-			}, 5000);
+					if (data.finished.length === memberLength) {
+						router.push("/batch");
+					}
+				}, 1000);
 
-			return () => clearInterval(interval);
+				return () => clearInterval(interval);
+			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [contestId, teamId, stepProblem, router, userId]);

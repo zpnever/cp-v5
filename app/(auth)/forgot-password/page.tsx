@@ -3,7 +3,7 @@ import React from "react";
 
 const ResetPage = () => {
 	return (
-		<div className="flex justify-center items-center h-[90vh]">
+		<div className="flex justify-center items-center h-[70vh]">
 			<FormResetPassword />
 		</div>
 	);

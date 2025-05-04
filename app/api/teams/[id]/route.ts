@@ -14,7 +14,11 @@ export async function GET(
 			include: {
 				members: true,
 				submissions: { include: { submissionProblems: true } },
-				batches: true,
+				batches: {
+					include: {
+						batch: true,
+					},
+				},
 			},
 		});
 

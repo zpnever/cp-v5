@@ -136,12 +136,12 @@ const DetailBatchById = ({ batchId }: { batchId: string }) => {
 		<div className="container mx-auto p-4 max-w-6xl">
 			{/* Batch Header */}
 			<Button
-					variant="outline"
-					onClick={() => window.history.back()}
-					className="mb-4"
-				>
-					<ArrowLeft className="mr-2 h-4 w-4" /> Back to Teams
-				</Button>
+				variant="outline"
+				onClick={() => window.history.back()}
+				className="mb-4"
+			>
+				<ArrowLeft className="mr-2 h-4 w-4" /> Back to Batches
+			</Button>
 			<div className="mb-6">
 				<div className="flex items-center justify-between mb-2">
 					<h1 className="text-3xl font-bold">{batch.title}</h1>
@@ -159,7 +159,9 @@ const DetailBatchById = ({ batchId }: { batchId: string }) => {
 				<div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
 					<div className="flex items-center gap-1">
 						<Calendar className="h-4 w-4" />
-						<span>Started: {new Date(batch.startedAt).toLocaleDateString("id-ID")}</span>
+						<span>
+							Started: {new Date(batch.startedAt).toLocaleDateString("id-ID")}
+						</span>
 					</div>
 					<div className="flex items-center gap-1">
 						<Clock className="h-4 w-4" />

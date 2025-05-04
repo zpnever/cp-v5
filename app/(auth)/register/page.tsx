@@ -11,8 +11,8 @@ const VerifyPage = () => {
 	const [email, setEmail] = useState("");
 
 	return (
-		<div className="flex justify-center items-center h-[90vh]">
-			{step === 1 ? (
+		<div className="flex justify-center items-center h-[70vh]">
+			{step === 1 ?
 				<FormVerifyEmail
 					onSuccess={() => {
 						setStep(2);
@@ -20,7 +20,7 @@ const VerifyPage = () => {
 					}}
 					onSetEmail={(e) => setEmail(e)}
 				/>
-			) : step === 2 ? (
+			: step === 2 ?
 				<FormOTPVerify
 					email={email}
 					onResendOTP={() => {
@@ -33,15 +33,14 @@ const VerifyPage = () => {
 						setStep(3);
 					}}
 				/>
-			) : (
 				// <FormRegister email={email} />
-				<FormRegister
+			:	<FormRegister
 					email={email}
 					onSuccess={() => {
 						toast.success("Successfully register", { removeDelay: 2000 });
 					}}
 				/>
-			)}
+			}
 		</div>
 	);
 };

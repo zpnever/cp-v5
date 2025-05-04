@@ -17,7 +17,7 @@ const NewPasswordContent = () => {
 
 const NewPassword = () => {
 	return (
-		<div className="flex justify-center items-center h-[90vh]">
+		<div className="flex justify-center items-center h-[70vh]">
 			<Suspense fallback={<p>Loading...</p>}>
 				<NewPasswordContent />
 			</Suspense>
