@@ -12,6 +12,7 @@ import Link from "next/link";
 import { duplicateBatch } from "@/actions/duplicateBatch";
 import AlertDeleteBatch from "./ui/Alert-Delete";
 import AlertSubmitBatch from "./ui/Alert-Submit";
+import { Badge } from "../ui/badge";
 
 interface IBatch extends FormBatchType {
 	id: string;
@@ -60,6 +61,23 @@ const BatchManagement = () => {
 		});
 	};
 
+	const checkStatus = (publish: boolean, startedAt: string, timer: number) => {
+		if (publish) {
+			const currentTime = new Date();
+			const startDate = new Date(startedAt);
+			const endDate = new Date(startDate.getTime() + timer * 60 * 1000);
+
+			if (currentTime >= startDate && currentTime < endDate) {
+				return ["Active", "default"];
+			} else if (currentTime >= endDate) {
+				return ["Finish", "success"];
+			} else {
+				return ["Not Started Yet", "secondary"];
+			}
+		}
+		return ["Not Publish", "destructive"];
+	};
+
 	if (isLoading) {
 		return (
 			<div className="flex justify-center flex-col gap-3 items-center min-h-screen">
@@ -103,15 +121,14 @@ const BatchManagement = () => {
 			</div>
 
 			{/* Batch List */}
-			{batch.length === 0 ? (
+			{batch.length === 0 ?
 				<div className="flex items-center justify-center bg-gray-50 rounded-lg p-12 border border-gray-200">
 					<div className="text-center">
 						<p className="text-gray-500 mb-4">No batches found</p>
 						<Button variant="default">Create your first batch</Button>
 					</div>
 				</div>
-			) : (
-				<div className="space-y-3">
+			:	<div className="space-y-3">
 					{batch.map((data) => (
 						<div
 							key={data.id}
@@ -119,12 +136,36 @@ const BatchManagement = () => {
 						>
 							<div className="flex justify-between items-start gap-6">
 								<div className="flex-1">
-									<Link
-										href={`/admin/batch/${data.id}`}
-										className="text-xl font-medium text-gray-800 hover:text-blue-600 transition-colors"
-									>
-										{data.title}
-									</Link>
+									<div className="flex items-center gap-3">
+										<Link
+											href={`/admin/batch/${data.id}`}
+											className="text-xl font-medium text-gray-800 hover:text-blue-600 transition-colors"
+										>
+											{data.title}
+										</Link>
+										<Badge
+											variant={
+												checkStatus(
+													data.publish,
+													data.startedAt,
+													Number(data.timer)
+												)[1] as
+													| "default"
+													| "secondary"
+													| "destructive"
+													| "outline"
+													| "success"
+													| "warning"
+											}
+											className="font-normal"
+										>
+											{checkStatus(
+												data.publish,
+												data.startedAt,
+												Number(data.timer)
+											)[0] || "Not Started Yet"}
+										</Badge>
+									</div>
 									<p className="text-gray-600 text-sm mt-1 mb-4">
 										{data.description}
 									</p>
@@ -134,12 +175,11 @@ const BatchManagement = () => {
 										<p className="text-sm font-medium mb-2 text-gray-700">
 											Problems
 										</p>
-										{data.problems.length === 0 ? (
+										{data.problems.length === 0 ?
 											<p className="text-sm text-gray-500 italic">
 												No problems added
 											</p>
-										) : (
-											<div className="space-y-1.5">
+										:	<div className="space-y-1.5">
 												{data.problems.map((prob, index) => (
 													<div
 														key={index}
@@ -150,7 +190,7 @@ const BatchManagement = () => {
 													</div>
 												))}
 											</div>
-										)}
+										}
 									</div>
 								</div>
 
@@ -201,7 +241,7 @@ const BatchManagement = () => {
 						</div>
 					))}
 				</div>
-			)}
+			}
 		</div>
 	);
 };

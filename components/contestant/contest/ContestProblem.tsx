@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import EditorLayer, { EditorLayerHandle } from "./EditorLayer";
 import CountdownTimer from "./ui/CountdownTimer";
+import { Badge } from "@/components/ui/badge";
 
 const languages = [
 	{ name: "Javascript", id: "15" },
@@ -185,7 +186,7 @@ const ContestProblem = ({
 				fetch(`/api/locked-problem/${contestId}/${teamId}`).catch(() => {
 					toast.error("Gagal refresh data soal terkunci");
 				});
-			}, 600000); // 10 Menit
+			}, 300000); // 5 Menit
 
 			return () => clearInterval(interval);
 		}
@@ -194,6 +195,8 @@ const ContestProblem = ({
 
 	const handleOnBack = async () => {
 		const roomId = `${teamId}:${contestId}`;
+
+		resetLogs(`${teamId}:${problemId}`);
 
 		const reqBody = {
 			contestId,
@@ -236,7 +239,7 @@ const ContestProblem = ({
 
 	const handleSubmit = async () => {
 		const codeFromEditor = editorRef.current?.getCode();
-		const roomId = `${userId}:${contestId}`;
+		const roomId = `${userId}:${problemId}`;
 
 		resetLogs(roomId);
 		setStepLogs(true);
@@ -361,23 +364,29 @@ const ContestProblem = ({
 								</div>
 								<div className="ml-4">
 									{submissionProblem?.success ?
-										<div>
-											<span>
-												Memory :{" "}
-												<span className="text-orange-700">
-													{submissionProblem.memory}
-												</span>{" "}
-												KB{" "}
-											</span>
-											&
-											<span>
-												{" "}
-												Time :{" "}
-												<span className="text-orange-700">
-													{submissionProblem.executionTime}
-												</span>{" "}
-												S
-											</span>
+										<div className="flex flex-row items-center gap-3">
+											<div>
+												<span>
+													Memory :{" "}
+													<span className="text-orange-700">
+														{submissionProblem.memory}
+													</span>{" "}
+													KB{" "}
+												</span>
+												&
+												<span>
+													{" "}
+													Time :{" "}
+													<span className="text-orange-700">
+														{submissionProblem.executionTime}
+													</span>{" "}
+													S
+												</span>
+											</div>
+
+											<Badge variant="success" className="font-normal">
+												Success
+											</Badge>
 										</div>
 									:	<div></div>}
 								</div>
