@@ -52,12 +52,6 @@ const useSocket = (url: string) => {
 			});
 
 			socketRef.current = socket;
-
-			// Optional cleanup
-			return () => {
-				socket.disconnect();
-				socketRef.current = null;
-			};
 		}
 	}, [url]);
 
@@ -152,7 +146,6 @@ const ContestProblem = ({
 		});
 
 		return () => {
-			socket.off("unlocked-check");
 			socket.off("submission-log");
 			socket.off("submission-result");
 		};
